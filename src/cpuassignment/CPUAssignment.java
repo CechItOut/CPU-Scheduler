@@ -7,8 +7,13 @@ public class CPUAssignment
 {
     //use a variable to track how many processes have been created
 int processNumber = 0;
-    //another variable to track the arrival time of each process
-int arrivalTime = 0;   
+    //another variable to track the wait time of each process
+int waitTime = 0;   
+    //and a variable to track the turnaround time of each process
+int turnaround = 0;
+//now two more variables to track the averages of the wait and turnaround times
+Double avgWait = 0.0;
+Double avgTurn = 0.0;
     public static void main(String[] args) 
     {
        new CPUInterface().setVisible(true);
@@ -28,14 +33,12 @@ int arrivalTime = 0;
         //next, record the burstTime of the process
         p[1] = burstTime;  
         
-        //now give the process its order. This changes depending on algorithm,
-        //but until then, just assume we take the processes from first to last.
-        p[2] = processNumber;
+        //obscure wait time from viewer, since nothing has been sorted yet
+        p[2] = "N/A";
         
-        //finally, give the process its arrival time
-        p[3] = arrivalTime;
-        //prepare the next process' arrival time
-        arrivalTime = arrivalTime + (int) p[1];
+        //obscure turnaround time from viewer, since nothing is executed yet
+        p[3] = "N/A";
+
         
         
         
@@ -57,15 +60,23 @@ int arrivalTime = 0;
             {
             String s = JOptionPane.showInputDialog("How many "
                 + "milliseconds should the process be? Please enter an integer"
-                + " between 1 and 1000." + "\nOr type 'exit' to cancel");
-            
-                if (s.equalsIgnoreCase("exit") == true)
+           + " between 1 and 1000." + "\nOr hit the 'cancel' button to cancel");
+            //if the user hits the cancel button, do nothing
+            if (s == null)
                 {
-                processNumber--;
-                return null;
+                    processNumber--;
+                    return null;
                 }
-                
+
             burstTime = Integer.parseInt(s);
+           //don't let the user enter integers less than 1 or greater than 1000
+                if (burstTime < 1 || burstTime > 1000)
+                {
+              JOptionPane.showMessageDialog(null,"Error: the given burst time "
+                    + "for the process was either too long or too short.");
+                    //let the user make another entry keeping the loop running
+                    burstTime = -1;
+                }
             }
             catch (NumberFormatException ex)
             {
@@ -80,51 +91,87 @@ int arrivalTime = 0;
         //next, record the burstTime of the process
         p[1] = burstTime;  
         
-        //now give the process its order. This changes depending on algorithm,
-        //but until then, just assume we take the processes from first to last.
-        p[2] = processNumber;
+        //obscure wait time from view, since nothing has been sorted yet
+        p[2] = "N/A";
         
-        //finally, give the process an arrival time
-        p[3] = arrivalTime;
-        //prepare the next process' arrival time
-        arrivalTime = arrivalTime + (int) p[1];
+        //obscure turnaround time from viewer, since nothing is executed yet
+        p[3] = "N/A";
         
-        //don't let the user enter integers less than 1 or greater than 1000
-        if (burstTime < 1 || burstTime > 1000)
-        {
-            JOptionPane.showMessageDialog(null,"Error: the given burstTime "
-                    + "for the process was either too long or too short.");
-            //let the user make another entry
-            processNumber--;
-            arrivalTime = arrivalTime - (int) p[1];
-            burstTime = 0;
-            customProcess(p);
-        }
+        
+       
         
         return p;
     }
     
-    public void removeProcess(Object[] p, Object[] q)
+    public Object[] removeProcess(Object[] q)
     {
+ //decremenet process counter so the next process 'replaces' the removed process
         processNumber--;
-        //if there is more than one process
-        if (p != null)
-        {
-        arrivalTime = arrivalTime - (int) q[1];
-        System.out.println(arrivalTime);
-        System.out.println("time to take off arrival time is " + p[1]);
-        }
-        //if there is only one process
-        if (p == null)
-        {
-            System.out.println("one item");
-            arrivalTime = arrivalTime - (int) q[1];
-            System.out.println(arrivalTime);
-        }
-        
-        System.out.println(processNumber);
-        //get rid of any data stored inside q, the array to be removed
+        //get rid of any data stored inside the array to be removed
         q = null;
+        return q;
+    }
+    
+    //first come first serve algorithm
+    //note that processes are already entered in this order
+    //so all we have to do is calculate the wait and turnaround times
+    
+    public Object[][] firstComeFirstServe(Object[][] table)
+    {
+        //if there are no processes to work with
+        if (table.length == 0)
+        {
+            JOptionPane.showMessageDialog(null, "Error: There are no processes to sort.");
+            return table;
+        }
+        //give the turnaround time for the first process
+        table[0][2] = 0;
+  //go through the table, setting the wait and turnaround times for each process
+        for (int i = 0; i<table.length - 1; i++)
+        {
+            turnaround = waitTime + (int) (table[i][1]);
+            waitTime = waitTime + (int) (table[i][1]);
+            table[i+1][2] = waitTime;
+            table[i][3] = turnaround;
+        }
+   //the loop will not cover the last index's turnaround time, so do it manually
+     table[table.length - 1][3] = waitTime + (int) (table[table.length - 1][1]);
+     
+     
+     //now we find the average wait time and average turnaround time
+     for (int i=0; i<table.length;i++)
+     {
+         avgWait = avgWait + (int) table[i][2];
+         avgTurn = avgTurn + (int) table[i][3];
+     }
+     avgWait = Math.round(avgWait / processNumber * 100.0) / 100.0;
+     avgTurn = Math.round(avgTurn / processNumber * 100.0) / 100.0;
+     //we will need to access these average times separately so we can output
+     //them onto the interface
+     
+     //lastly, set the wait and turnaround times back to 0 so they are
+     //ready for the next algorithm
+     waitTime = 0;
+     turnaround = 0;
+
+        return table;
+    }
+    
+    //need get methods for the averages so we can output them in the interface
+    public Double getAvgWait(double a)
+    {
+        a = avgWait;
+   //set average wait back to 0 so it is ready for the next set of calculations
+        avgWait = 0.0;
+        return a;
+    }
+    
+    public Double getAvgTurn(double b)
+    {
+        b = avgTurn;
+     //set average turnaround back to 0 for the same reason we set avgWait to 0
+        avgTurn = 0.0;
+        return b;
     }
     
 }

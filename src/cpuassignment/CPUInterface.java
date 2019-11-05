@@ -13,7 +13,7 @@ static CPUAssignment processDeterminator = new CPUAssignment();
 
 //data for the table
 Object[][] tableFace = {};
-String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
+String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
 
 
     public CPUInterface() 
@@ -35,10 +35,13 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
         customProcessButton = new javax.swing.JButton();
         randomProcessButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        algorithmSelection = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         processOrdering = new javax.swing.JTable();
         removeProcess = new javax.swing.JButton();
+        sortProcesses = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        outputAverages = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("COM310 CPU Assignment by Daniel Rossano");
@@ -66,14 +69,14 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
 
         jLabel2.setText("Select algorithm:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Shortest Job First" }));
+        algorithmSelection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "First Come First Serve", "Shortest Job First" }));
 
         processOrdering.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Process", "Burst Time", "Order", "Arrival Time"
+                "Process", "Burst Time", "Wait Time", "Turnaround Time"
             }
         ) {
             Class[] types = new Class [] {
@@ -87,49 +90,68 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
         processOrdering.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(processOrdering);
 
-        removeProcess.setText("Remove Most Recent Process");
+        removeProcess.setText("Remove Last Process");
         removeProcess.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 removeProcessActionPerformed(evt);
             }
         });
 
+        sortProcesses.setText("Sort Processes by Selected Algorithm");
+        sortProcesses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sortProcessesActionPerformed(evt);
+            }
+        });
+
+        outputAverages.setColumns(20);
+        outputAverages.setRows(5);
+        jScrollPane2.setViewportView(outputAverages);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addComponent(jLabel1)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(removeProcess)
-                        .addGap(27, 27, 27)
-                        .addComponent(exitButton))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
+                                .addGap(23, 23, 23)
+                                .addComponent(customProcessButton)
+                                .addGap(18, 18, 18)
+                                .addComponent(randomProcessButton)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(customProcessButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(randomProcessButton)
-                        .addGap(31, 31, 31))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(250, 250, 250)))
+                        .addGap(367, 367, 367))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(211, 211, 211)
-                                .addComponent(jLabel2))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(180, 180, 180)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addGap(338, 338, 338))
+                        .addGap(75, 75, 75)
+                        .addComponent(sortProcesses)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addGroup(layout.createSequentialGroup()
-                .addGap(107, 107, 107)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(211, 211, 211)
+                        .addComponent(jLabel2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(180, 180, 180)
+                        .addComponent(algorithmSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(131, 131, 131)
+                        .addComponent(removeProcess)
+                        .addGap(49, 49, 49)
+                        .addComponent(exitButton)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -137,20 +159,27 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(algorithmSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(9, 9, 9)
-                .addComponent(jLabel1)
-                .addGap(42, 42, 42)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(customProcessButton)
                     .addComponent(randomProcessButton))
-                .addGap(43, 43, 43)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sortProcesses)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(64, 64, 64)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(exitButton)
                     .addComponent(removeProcess))
-                .addContainerGap())
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         pack();
@@ -277,16 +306,9 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
     //if there is actually something in the table for us to remove
         if (tableFace.length >= 1)
         {
-            //actually remove the data
-            //if there is more than one process in the table
-            if (tableFace.length > 1)
-            {
-            processDeterminator.removeProcess(tableFace[tableFace.length - 2],
-                    tableFace[tableFace.length - 1]);
-            }
-            //if there is only one process in the table
-            else
-        processDeterminator.removeProcess(null,tableFace[tableFace.length - 1]);
+            //remove the data     
+      tableFace[tableFace.length - 1] = 
+            processDeterminator.removeProcess(tableFace[tableFace.length - 1]);
             
             
             
@@ -326,10 +348,59 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
       ((AbstractTableModel)(processOrdering.getModel())).fireTableDataChanged();
         }
         
-        
+      //if any averages were output, get rid of them as they are now inaccurate
+      if(outputAverages.getText().equalsIgnoreCase("") == false)
+      {
+ outputAverages.setText("One or more processes have been removed."
+         + "\nThe previous averages are now inaccurate."
+         + "\nRun the algorithm again to see the new averages.");
+      }
         
         
     }//GEN-LAST:event_removeProcessActionPerformed
+
+    private void sortProcessesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortProcessesActionPerformed
+     
+     if (algorithmSelection.getSelectedItem().equals("First Come First Serve"))
+     {
+       tableFace = processDeterminator.firstComeFirstServe(tableFace);
+     }
+           
+           processOrdering.setModel(new AbstractTableModel()
+           {
+              public int getRowCount() {
+                  return tableFace.length;
+              }
+              
+              public int getColumnCount(){
+                  return 4;
+              }
+              
+              public String getColumnName(int column)
+              {
+                  return columnName[column];
+              }
+              
+              public Object getValueAt(int i, int i1)
+              {
+                  return tableFace[i][i1];
+              }
+           }
+           );
+    ((AbstractTableModel) (processOrdering.getModel())).fireTableDataChanged();
+    //if there is something in the table
+    if(tableFace.length >= 1) 
+    {
+    //then we must output the average wait and turnaround times
+    Double avgWait = 0.0;
+    avgWait = processDeterminator.getAvgWait(avgWait);
+    Double avgTurn = 0.0;
+    avgTurn = processDeterminator.getAvgTurn(avgTurn);
+    
+    outputAverages.setText("Average Wait Time: " + avgWait + " ms" 
+            + "\nAverage Turnaround Time: " + avgTurn + " ms");
+    }
+    }//GEN-LAST:event_sortProcessesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -367,14 +438,17 @@ String[] columnName = {"Process", "Burst Time", "Order", "Arrival Time"};
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> algorithmSelection;
     private javax.swing.JButton customProcessButton;
     private javax.swing.JButton exitButton;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea outputAverages;
     private javax.swing.JTable processOrdering;
     private javax.swing.JButton randomProcessButton;
     private javax.swing.JButton removeProcess;
+    private javax.swing.JButton sortProcesses;
     // End of variables declaration//GEN-END:variables
 }
