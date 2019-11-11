@@ -38,10 +38,6 @@ Double avgTurn = 0.0;
         
         //obscure turnaround time from viewer, since nothing is executed yet
         p[3] = "N/A";
-
-        
-        
-        
         
         return p;
     }
@@ -98,8 +94,6 @@ Double avgTurn = 0.0;
         p[3] = "N/A";
         
         
-       
-        
         return p;
     }
     
@@ -121,7 +115,7 @@ Double avgTurn = 0.0;
         //if there are no processes to work with
         if (table.length == 0)
         {
-            JOptionPane.showMessageDialog(null, "Error: There are no processes to sort.");
+  JOptionPane.showMessageDialog(null, "Error: There are no processes to sort.");
             return table;
         }
         //give the turnaround time for the first process
@@ -134,7 +128,7 @@ Double avgTurn = 0.0;
             table[i+1][2] = waitTime;
             table[i][3] = turnaround;
         }
-   //the loop will not cover the last index's turnaround time, so do it manually
+  //the loop will not cover the last index's turnaround time, so do it manually
      table[table.length - 1][3] = waitTime + (int) (table[table.length - 1][1]);
      
      
@@ -154,6 +148,75 @@ Double avgTurn = 0.0;
      waitTime = 0;
      turnaround = 0;
 
+        return table;
+    }
+    
+    public Object[][] shortestJobFirst(Object[][] table)
+    {
+        if (table.length == 0)
+        {
+   JOptionPane.showMessageDialog(null,"Error: There are no processes to sort.");
+            return table;
+        }
+        
+        
+     //the first step is to sort the processes by burst time
+     //(arrival time is assumed to be uniform)
+     //while not the most efficient method, bubble sort will do the trick
+     Object[] temp;
+     boolean swapped = false;
+     for (int i=0; i<table.length - 1; i++)
+     {
+         swapped = false;
+         for (int j=0; j<table.length - 1 - i; j++)
+         {
+            if ((int) table[j][1] > (int) table[j+1][1]) 
+            {
+                temp = table[j];
+                table[j] = table[j+1];
+                table[j+1] = temp;
+                swapped = true;
+            }
+         }
+         
+         if (swapped == false)
+         {
+             break;
+         }
+     }
+     //now we can run the first come first serve algorithm, since
+     //the table has now been sorted from shortest process to longest process
+             //give the turnaround time for the first process
+        table[0][2] = 0;
+  //go through the table, setting the wait and turnaround times for each process
+        for (int i = 0; i<table.length - 1; i++)
+        {
+            turnaround = waitTime + (int) (table[i][1]);
+            waitTime = waitTime + (int) (table[i][1]);
+            table[i+1][2] = waitTime;
+            table[i][3] = turnaround;
+        }
+  //the loop will not cover the last index's turnaround time, so do it manually
+     table[table.length - 1][3] = waitTime + (int) (table[table.length - 1][1]);
+     
+     
+     //now we find the average wait time and average turnaround time
+     for (int i=0; i<table.length;i++)
+     {
+         avgWait = avgWait + (int) table[i][2];
+         avgTurn = avgTurn + (int) table[i][3];
+     }
+     avgWait = Math.round(avgWait / processNumber * 100.0) / 100.0;
+     avgTurn = Math.round(avgTurn / processNumber * 100.0) / 100.0;
+     //we will need to access these average times separately so we can output
+     //them onto the interface
+     
+     //lastly, set the wait and turnaround times back to 0 so they are
+     //ready for the next algorithm
+     waitTime = 0;
+     turnaround = 0;
+     
+     
         return table;
     }
     

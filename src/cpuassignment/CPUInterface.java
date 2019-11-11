@@ -2,7 +2,10 @@
 /* Note: everything here except the code inside the button events
 was generated automatically by NetBeans */
 package cpuassignment;
-import javax.swing.table.*;
+import javax.swing.SwingUtilities;
+import javax.swing.table.*; 
+
+
 
 public class CPUInterface extends javax.swing.JFrame 
 {
@@ -16,11 +19,14 @@ Object[][] tableFace = {};
 String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
 
 
+
     public CPUInterface() 
     {
         initComponents();
     }
 
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -42,6 +48,7 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
         sortProcesses = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         outputAverages = new javax.swing.JTextArea();
+        removeData = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("COM310 CPU Assignment by Daniel Rossano");
@@ -108,6 +115,13 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
         outputAverages.setRows(5);
         jScrollPane2.setViewportView(outputAverages);
 
+        removeData.setText("Remove All Data");
+        removeData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeDataActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -150,7 +164,10 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
                         .addGap(131, 131, 131)
                         .addComponent(removeProcess)
                         .addGap(49, 49, 49)
-                        .addComponent(exitButton)))
+                        .addComponent(exitButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(217, 217, 217)
+                        .addComponent(removeData)))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -176,10 +193,11 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(exitButton)
                     .addComponent(removeProcess))
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(removeData))
         );
 
         pack();
@@ -234,13 +252,15 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
        }
        );
        //lastly, recreate the table with the new model
-       ((AbstractTableModel)(processOrdering.getModel())).fireTableDataChanged();
+      ((AbstractTableModel)(processOrdering.getModel())).fireTableDataChanged();
         
-        
-        System.out.println("Process number is " + p[0]);
-        System.out.println("Burst time is " + p[1]);
-        System.out.println("Order is " + p[2]);
-        System.out.println("Arrival time is " + p[3]);
+      //if any averages were output, get rid of them as they are now inaccurate
+      if(outputAverages.getText().equalsIgnoreCase("") == false)
+      {
+ outputAverages.setText("One or more processes have been added."
+         + "\nThe previous averages are now inaccurate."
+         + "\nRun the algorithm again to see the new averages.");
+      }
         
         
     }//GEN-LAST:event_randomProcessButtonActionPerformed
@@ -292,13 +312,14 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
        //lastly, recreate the tabel with the new model
       ((AbstractTableModel)(processOrdering.getModel())).fireTableDataChanged();
         }
-     if (p != null)   
-     {
-        System.out.println("Process: " + p[0]);
-        System.out.println("Burst time is " + p[1]);
-        System.out.println("Order is " + p[2]);
-        System.out.println("Arrival time is " + p[3]);
-     }
+        
+      //if any averages were output, get rid of them as they are now inaccurate
+      if(outputAverages.getText().equalsIgnoreCase("") == false)
+      {
+ outputAverages.setText("One or more processes have been added."
+         + "\nThe previous averages are now inaccurate."
+         + "\nRun the algorithm again to see the new averages.");
+      }
        
     }//GEN-LAST:event_customProcessButtonActionPerformed
 //to remove the process most recently created
@@ -365,6 +386,11 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
      {
        tableFace = processDeterminator.firstComeFirstServe(tableFace);
      }
+     
+     if (algorithmSelection.getSelectedItem().equals("Shortest Job First"))
+     {
+         tableFace = processDeterminator.shortestJobFirst(tableFace);
+     }
            
            processOrdering.setModel(new AbstractTableModel()
            {
@@ -400,7 +426,55 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
     outputAverages.setText("Average Wait Time: " + avgWait + " ms" 
             + "\nAverage Turnaround Time: " + avgTurn + " ms");
     }
+    
+
     }//GEN-LAST:event_sortProcessesActionPerformed
+
+    private void removeDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeDataActionPerformed
+   //this button will, unsurpringly, clear all proccesses, averages and charts
+   if (tableFace.length >= 1)
+   {
+       //remove all data from the table
+       for (int i = 0; i<tableFace.length; i++)
+        {
+            tableFace[i] = processDeterminator.removeProcess(tableFace[i]);
+        }
+       //restart the table with a "blank slate"
+   Object[][] tempData = new Object[0][4];
+   
+   tableFace = tempData;
+    processOrdering.setModel(new AbstractTableModel()
+        {
+            public int getRowCount() 
+            {
+            return tableFace.length;
+            }   
+    
+            public int getColumnCount() 
+            {
+            return 4;
+            }
+    
+            public String getColumnName(int column) 
+            {
+            return columnName[column];
+            }
+        
+            public Object getValueAt(int i, int i1)
+            {
+            return tableFace[i][i1];
+            }
+        }
+      );
+    ((AbstractTableModel) (processOrdering.getModel())).fireTableDataChanged();
+   }
+   
+   //if there was any output text, remove it
+   if (outputAverages.getText().equalsIgnoreCase("") == false)
+   {
+       outputAverages.setText("");
+   }
+    }//GEN-LAST:event_removeDataActionPerformed
 
     /**
      * @param args the command line arguments
@@ -448,6 +522,7 @@ String[] columnName = {"Process", "Burst Time", "Wait Time", "Turnaround Time"};
     private javax.swing.JTextArea outputAverages;
     private javax.swing.JTable processOrdering;
     private javax.swing.JButton randomProcessButton;
+    private javax.swing.JButton removeData;
     private javax.swing.JButton removeProcess;
     private javax.swing.JButton sortProcesses;
     // End of variables declaration//GEN-END:variables
