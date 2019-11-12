@@ -14,10 +14,16 @@ int turnaround = 0;
 //now two more variables to track the averages of the wait and turnaround times
 Double avgWait = 0.0;
 Double avgTurn = 0.0;
+
+//lastly, a boolean which determines if the processes have been sorted by SJF
+Boolean sorted = false;
+
     public static void main(String[] args) 
     {
        new CPUInterface().setVisible(true);
     }
+    
+    
     //the randomProcess and customProcess methods will create processes and
     //output them to a table from oldest creation to newest creation
     public Object[] randomProcess(Object[] p)
@@ -97,13 +103,43 @@ Double avgTurn = 0.0;
         return p;
     }
     
-    public Object[] removeProcess(Object[] q)
-    {
- //decremenet process counter so the next process 'replaces' the removed process
-        processNumber--;
+    public Object[][] removeProcess(Object[][] table)
+    {        
+  //if SJF has already run, we want to reorder the processes from first to last
+       if (sorted == true)
+        {
+            Object[] temp;
+            Boolean swapped = false;
+            
+            for (int i=0; i<table.length; i++)
+            {
+                for (int j=0; j<table.length  - i; j++)
+                {//once we have the jth element pointing to a certain process
+                    if (table[j][0].equals("P" + (processNumber - i)))
+                    {
+                    //swap it with the process occupying that position
+                        temp = table[j];
+                        table[j] = table[processNumber - 1 - i];
+                        table[processNumber - 1 - i] = temp;
+                        swapped = true;
+                    }
+                }
+                
+                if (swapped == false)
+                {
+                    break;
+                }
+            }
+          //now that we have undone the SJF ordering, set sorted back to false
+            sorted = false;
+        }
+        
         //get rid of any data stored inside the array to be removed
-        q = null;
-        return q;
+        table[processNumber - 1] = null;
+        
+//decremenet process counter so the next process 'replaces' the removed process
+        processNumber--;
+        return table;
     }
     
     //first come first serve algorithm
@@ -117,6 +153,35 @@ Double avgTurn = 0.0;
         {
   JOptionPane.showMessageDialog(null, "Error: There are no processes to sort.");
             return table;
+        }
+        
+  //if SJF has already run, we want to reorder the processes from first to last
+       if (sorted == true)
+        {
+            Object[] temp;
+            Boolean swapped = false;
+            
+            for (int i=0; i<table.length; i++)
+            {
+                for (int j=0; j<table.length  - i; j++)
+                {//once we have the jth element pointing to a certain process
+                    if (table[j][0].equals("P" + (processNumber - i)))
+                    {
+                    //swap it with the process occupying that position
+                        temp = table[j];
+                        table[j] = table[processNumber - 1 - i];
+                        table[processNumber - 1 - i] = temp;
+                        swapped = true;
+                    }
+                }
+                
+                if (swapped == false)
+                {
+                    break;
+                }
+            }
+          //now that we have undone the SJF ordering, set sorted back to false
+            sorted = false;
         }
         //give the turnaround time for the first process
         table[0][2] = 0;
@@ -199,6 +264,8 @@ Double avgTurn = 0.0;
   //the loop will not cover the last index's turnaround time, so do it manually
      table[table.length - 1][3] = waitTime + (int) (table[table.length - 1][1]);
      
+     //now that everything has been sorted by SJF, set the boolean to true
+     sorted = true;
      
      //now we find the average wait time and average turnaround time
      for (int i=0; i<table.length;i++)
@@ -215,6 +282,7 @@ Double avgTurn = 0.0;
      //ready for the next algorithm
      waitTime = 0;
      turnaround = 0;
+     
      
      
         return table;
